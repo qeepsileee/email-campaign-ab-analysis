@@ -1,0 +1,25 @@
+name: hillstrom-analytics
+services:
+  superset:
+    image: apache/superset:6.0.0
+    user: root
+    ports:
+      - "127.0.0.1:8088:8088"
+    environment:
+      SUPERSET_CONFIG_PATH: /app/project/bi/superset_config.py
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:?Run python bi/configure.py first}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Run python bi/configure.py first}
+      ADMIN_USERNAME: student
+    volumes:
+      - ..:/app/project:ro
+      - superset_home:/app/superset_home
+    command:
+      - /bin/bash
+      - -ec
+      - |
+        superset db upgrade
+        superset init
+        python /app/project/bi/bootstrap.py
+        gunicorn --bind 0.0.0.0:8088 --workers 2 --timeout 120 "superset.app:create_app()"
+volumes:
+  superset_home:

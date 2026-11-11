@@ -1,0 +1,55 @@
+name: Check analysis
+on:
+  push:
+  pull_request:
+jobs:
+  analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
+      - run: python run_analysis.py
+      - run: python scripts/execute_notebook.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: analysis-results
+          path: |
+            results/
+            reports/figures/
+            notebooks/email_experiment.ipynb
+  dashboard:
+    needs: analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: analysis-results
+          path: .
+      - run: python bi/configure.py
+      - run: docker compose --env-file bi/.env -f bi/compose.yml up -d
+      - run: |
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://localhost:8088/health; then exit 0; fi
+            sleep 5
+          done
+          docker compose --env-file bi/.env -f bi/compose.yml logs --tail 100
+          exit 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/check_dashboard.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: dashboard-preview
+          path: reports/figures/superset_dashboard.png
+      - if: failure()
+        run: docker compose --env-file bi/.env -f bi/compose.yml logs --tail 100

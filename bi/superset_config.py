@@ -1,0 +1,9 @@
+import os
+
+SECRET_KEY = os.environ['SUPERSET_SECRET_KEY']
+SQLALCHEMY_DATABASE_URI = 'sqlite:////app/superset_home/superset.db'
+TALISMAN_ENABLED = False
+FEATURE_FLAGS = {'DASHBOARD_NATIVE_FILTERS': True}
+WTF_CSRF_ENABLED = True
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
