@@ -4,7 +4,7 @@ on:
   pull_request:
 jobs:
   analysis:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,7 +24,7 @@ jobs:
             notebooks/email_experiment.ipynb
   dashboard:
     needs: analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -47,7 +47,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node tests/check_dashboard.mjs
       - uses: actions/upload-artifact@v4
-        if: success()
+        if: always()
         with:
           name: dashboard-preview
           path: reports/figures/superset_dashboard.png

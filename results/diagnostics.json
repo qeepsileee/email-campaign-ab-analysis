@@ -1,0 +1,28 @@
+{
+  "rows": 64000,
+  "columns": [
+    "recency",
+    "history_segment",
+    "history",
+    "mens",
+    "womens",
+    "zip_code",
+    "newbie",
+    "channel",
+    "segment",
+    "visit",
+    "conversion",
+    "spend"
+  ],
+  "missing": 0,
+  "identical_rows": 6562,
+  "duplicates_removed": 0,
+  "negative_spend": 0,
+  "source_sha256": "0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece",
+  "bootstrap_replicates": 30000,
+  "random_seed": 20261111,
+  "sql_reconciles": true,
+  "group_size_chi2_df2": 0.20253125000000002,
+  "group_size_p": 0.9036929575604196,
+  "max_abs_smd_checked_baselines": 0.016359543173779502
+}

@@ -34,7 +34,7 @@ def create_figures(summary, effects, output):
         bars = ax.bar(labels, values, color=colors, width=.55)
         ax.set_title(title, loc='left', pad=18)
         ax.set_ylim(0, max(values)*1.28)
-        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, p: formatter(v)))
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, p, fmt=formatter: fmt(v)))
         ax.bar_label(bars, labels=[formatter(v) for v in values], padding=7, fontsize=11)
         ax.grid(axis='y', alpha=.12)
         ax.set_axisbelow(True)
