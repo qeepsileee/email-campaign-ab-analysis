@@ -8,6 +8,7 @@ const password=envText.split('\n').find(line=>line.startsWith('ADMIN_PASSWORD=')
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1600,height:1180},deviceScaleFactor:1});
 const chartResponses=[];
+page.on('pageerror',error=>console.error('Browser error:',error.message));
 page.on('response',async response=>{
   if(response.url().includes('/api/v1/chart/data')&&response.request().method()==='POST'){
     try {chartResponses.push({status:response.status(),body:await response.json()});} catch {}
@@ -17,7 +18,10 @@ try {
 await page.goto('http://localhost:8088/login/',{waitUntil:'networkidle'});
 await page.locator('#username').fill('student');
 await page.locator('#password').fill(password);
-await page.locator('input[type=submit],button[type=submit]').first().click();
+await Promise.all([
+  page.waitForURL(url=>!url.pathname.startsWith('/login'),{timeout:20000}),
+  page.locator('input[type=submit],button[type=submit]').first().click(),
+]);
 await page.goto('http://localhost:8088/superset/dashboard/hillstrom-email-experiment/',{waitUntil:'networkidle',timeout:90000});
 await page.getByText('Purchase conversion',{exact:true}).first().waitFor({timeout:60000});
 await page.waitForFunction(()=>document.querySelectorAll('canvas').length>=3,null,{timeout:60000});

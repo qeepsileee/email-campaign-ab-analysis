@@ -11,6 +11,17 @@ def metric(expression, label):
             'label': label, 'hasCustomLabel': True, 'optionName': label}
 
 
+def query_context(dataset, params):
+    return json.dumps({
+        'datasource': {'id': dataset.id, 'type': 'table'}, 'force': False,
+        'queries': [{'time_range': 'No filter', 'filters': [], 'extras': {},
+                     'columns': ['segment'], 'metrics': params['metrics'],
+                     'orderby': [], 'row_limit': 1000, 'order_desc': True,
+                     'annotation_layers': [], 'post_processing': []}],
+        'form_data': params, 'result_format': 'json', 'result_type': 'full',
+    })
+
+
 with app.app_context():
     from superset import db, security_manager
     from superset.connectors.sqla.models import SqlaTable
@@ -65,6 +76,7 @@ with app.app_context():
         }
         chart.viz_type = 'echarts_timeseries_bar'
         chart.params = json.dumps(params)
+        chart.query_context = query_context(dataset, params)
         charts.append(chart)
 
     table = db.session.query(Slice).filter_by(slice_name='Group metrics', datasource_id=dataset.id).one_or_none()
@@ -85,6 +97,7 @@ with app.app_context():
                           'Revenue per customer': {'d3NumberFormat': '$,.3f'}},
     })
     charts.append(table)
+    table.query_context = query_context(dataset, json.loads(table.params))
     db.session.commit()
 
     slug = 'hillstrom-email-experiment'
